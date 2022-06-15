@@ -1,0 +1,54 @@
+Found VASP output files in /public/home/topodata/catalogue_data/catalogue_data/sg225/SnTe/mp-1883/band_soc. Analyzing...
+
+Irreps of bands at kpoint:  GM
+band      1-4:  GM10d 
+band      5-8:  GM10d 
+band     9-10:  GM7d 
+band    11-12:  GM6d 
+band    13-14:  GM6d 
+band    15-16:  GM8d 
+band    17-20:  GM11d 
+Irreps of bands at kpoint:  L
+band      1-2:  L4d + L5d 
+band      3-4:  L8d 
+band      5-6:  L8d 
+band      7-8:  L4d + L5d 
+band     9-10:  L8d 
+band    11-12:  L9d 
+band    13-14:  L8d 
+band    15-16:  L8d 
+band    17-18:  L4d + L5d 
+band    19-20:  L9d 
+Irreps of bands at kpoint:  W
+band      1-2:  W6d 
+band      3-4:  W7d 
+band      5-6:  W6d 
+band      7-8:  W7d 
+band     9-10:  W6d 
+band    11-12:  W6d 
+band    13-14:  W7d 
+band    15-16:  W7d 
+band    17-18:  W6d 
+band    19-20:  W7d 
+Irreps of bands at kpoint:  X
+band      1-2:  X6d 
+band      3-4:  X7d 
+band      5-6:  X6d 
+band      7-8:  X7d 
+band     9-10:  X7d 
+band    11-12:  X6d 
+band    13-14:  X6d 
+band    15-16:  X8d 
+band    17-18:  X8d 
+band    19-20:  X9d 
+
+Irreducible Representations of all valence bands:
+  2  GM6d,   1  GM7d,   1  GM8d,   2 GM10d,   1 GM11d,
+  3   L4d + L5d,   5   L8d,   2   L9d,
+  5   W6d,   5   W7d,
+  4   X6d,   3   X7d,   2   X8d,   1   X9d,
+
+Space group: 225 
+Spin-orbit coupling: Yes 
+Topological classification: Topological crystalline insulator (TCI)
+Symmetry-based Indicator Z8 : 4

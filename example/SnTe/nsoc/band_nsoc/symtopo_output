@@ -1,0 +1,45 @@
+Found VASP output files in /public/home/topodata/catalogue_data/catalogue_data/sg225/SnTe/mp-1883/band_nsoc. Analyzing...
+
+Irreps of bands at kpoint:  GM
+band      1-2:  GM3+ 
+band      3-5:  GM5+ 
+band        6:  GM1+ 
+band        7:  GM1+ 
+band     8-10:  GM4- 
+Irreps of bands at kpoint:  L
+band      1-2:  L3+ 
+band        3:  L1+ 
+band      4-5:  L3+ 
+band        6:  L2- 
+band        7:  L1+ 
+band      8-9:  L3+ 
+band       10:  L2- 
+Irreps of bands at kpoint:  W
+band        1:  W2 
+band        2:  W1 
+band      3-4:  W5 
+band        5:  W4 
+band        6:  W2 
+band        7:  W1 
+band      8-9:  W5 
+band       10:  W1 
+Irreps of bands at kpoint:  X
+band        1:  X1+ 
+band        2:  X4+ 
+band        3:  X2+ 
+band      4-5:  X5+ 
+band        6:  X1+ 
+band        7:  X1+ 
+band        8:  X3- 
+band     9-10:  X5- 
+
+Irreducible Representations of all valence bands:
+  2  GM1+,   1  GM3+,   1  GM4-,   1  GM5+,
+  2   L1+,   2   L2-,   3   L3+,
+  3    W1,   2    W2,   1    W4,   2    W5,
+  3   X1+,   1   X2+,   1   X3-,   1   X4+,   1   X5+,   1   X5-,
+
+Space group: 225 
+Spin-orbit coupling: No 
+Topological classification: High-symmetry-line semimetal (HSLSM)
+HSLs where band crossings exist:  'W-Q-L'
