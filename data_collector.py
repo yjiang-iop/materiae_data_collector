@@ -131,7 +131,7 @@ def load_data():
     data = np.load('mat_data.npy', allow_pickle=True)
 
 if __name__ == '__main__':
-    path = os.getcwd() + '/example/test'
+    path = os.getcwd() + '/example/SnTe'
     collect_data(path)
 
 
