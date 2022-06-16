@@ -5,87 +5,133 @@ from func.read_doscar import *
 from func.plot_band import plot_band, read_EIGENVAL
 
 '''
-1. Assume the material is computed using symtopo, with folders scf/, wave/, band/, dos/.
-   In the wave/ folder, the symtopo output is saved in a file symtopo_output.
-2. collect basic info of the material.
-   Info that needs to be input manually: mp_id, icsd_ids
+1. Assume the material is computed using vasp, with folders scf/, wave/, band/, dos/.
+   In the wave/ folder, the wavefunction at high-symmetry points is computed, 
+   and the output of symtopo is saved in a file named symtopo_output.
+2. This script is used to collect basic info of the material, generating output files mat.npy, bandplot.svg, dos.dat
+   Info that needs to be input manually: mp_id, icsd_ids.
 
 '''
 
 
 def collect_data(home_path):
-    # this script should be exculated in the folder that contains the following folders: scf/, wave/, band/, and dos/  
+    # this script should be exculated in the folder that contains the following folders:   
+    # if the folders have different names, one can change the following dir_name: 
+    dir_name = {'scf_soc': 'scf_soc', 'wave_soc': 'wave_soc', 'band_soc': 'band_soc', 'dos_soc': 'dos_soc',
+                'scf_nsoc': 'scf_nsoc', 'wave_nsoc': 'wave_nsoc', 'band_nsoc': 'band_nsoc', 'dos_nsoc': 'dos_nsoc'}
+
     os.chdir(home_path)
-    assert 'scf' in os.listdir() and 'band' in os.listdir(), (
+    assert dir_name['scf_soc'] in os.listdir() and dir_name['wave_soc'] in os.listdir(), (
         'Please exculated this script in the folder that contains the following folders: scf/, wave/, band/, and dos/')
-    scf_path, wave_path,  = home_path + '/scf', home_path + '/wave'
+    scf_soc_path, wave_soc_path  = home_path +'/'+ dir_name['scf_soc'], home_path +'/'+ dir_name['wave_soc']
+    band_soc_path, dos_soc_path  = home_path +'/'+ dir_name['band_soc'], home_path +'/'+ dir_name['dos_soc']
+    scf_nsoc_path, wave_nsoc_path  = home_path +'/'+ dir_name['scf_nsoc'], home_path +'/'+ dir_name['wave_nsoc']
+    band_nsoc_path, dos_nsoc_path  = home_path +'/'+ dir_name['band_nsoc'], home_path +'/'+ dir_name['dos_nsoc']
 
     data = {'formula': None, 'elements_num': None, 'nelem': None, 'mp_id': None, 'icsd_ids': None,
-            'nelec': None, 'nsite': None, 'spacegroup': None, 
-            'prim_cif_str': None, 'conv_cif_str': None, 'BZ': None, 
-            'efermi': None, 'dos': None, 'fermi_dos': None, 'dos_gap': None, 
-            'indirect_gap': None, 'band': None, 
-            'topo_class': None, 'ind_group': None, 'sym_ind': None, 
-            'dgn_IR': None, 'dgn_dim': None, 'dgn_irrep': None, 'dgn_hsp': None,
-            'dgn_hsl': None}
+            'nelec': None, 'nsite': None, 'spacegroup': None,  
+            'poscar_str': None, 'prim_cif_str': None, 'conv_cif_str': None, 'BZ': None, 
+            'soc_efermi': None, 'soc_dos': None, 'soc_fermi_dos': None, 'soc_dos_gap': None, 
+            'soc_indirect_gap': None, 'soc_band': None, 
+            'soc_topo_class': None, 'soc_ind_group': None, 'soc_sym_ind': None, 
+            'soc_dgn_IR': None, 'soc_dgn_dim': None, 'soc_dgn_irrep': None, 'soc_dgn_hsp': None, 'soc_dgn_hsl': None,
+            'nsoc_efermi': None, 'nsoc_dos': None, 'nsoc_fermi_dos': None, 'nsoc_dos_gap': None, 
+            'nsoc_indirect_gap': None, 'nsoc_band': None, 
+            'nsoc_topo_class': None, 'nsoc_ind_group': None, 'nsoc_sym_ind': None, 
+            'nsoc_dgn_IR': None, 'nsoc_dgn_dim': None, 'nsoc_dgn_irrep': None, 'nsoc_dgn_hsp': None, 'nsoc_dgn_hsl': None}
     
-    # read info from POSCAR
-    poscar_data = read_structure(wave_path)
+    # read info from wave_soc/POSCAR
+    poscar_data = read_structure(scf_soc_path)
     data['nelem'] = poscar_data['nelem']
     data['formula'] = poscar_data['formula']
     data['elements_num'] = poscar_data['elements_num']
     data['nsite'] = poscar_data['nsite']
     data['spacegroup'] = poscar_data['spacegroup']
-    # FIXME: not sure what is 'prim_cif_str', 'conv_cif_str', check database
+    data['poscar_str'] = poscar_data['poscar_str'] # FIXME: str of POSCAR, can be used to generate 'prim_cif_str', 'conv_cif_str'.
+    # FIXME: 'BZ' seems to be generated using other scripts.
 
-    # read info from OUTCAR
+    # read info from scf_soc/OUTCAR
     os.chdir(home_path)
-    outcar_data = read_OUTCAR(scf_path)
-    Ef_scf = outcar_data['Ef']
-    soc = outcar_data['soc']
-    data['nelec'] = outcar_data['NELECT']
-    data['efermi'] = Ef_scf
-    data['indirect_gap'] = outcar_data['indirect_gap']
+    if os.path.exists(scf_soc_path):
+        outcar_data = read_OUTCAR(scf_soc_path)
+        Ef_scf_soc = outcar_data['Ef']
+        data['nelec'] = outcar_data['NELECT']
+        data['soc_efermi'] = Ef_scf_soc
+        data['soc_indirect_gap'] = outcar_data['indirect_gap']
 
-    # read info from wave, i.e., topological classification data
     os.chdir(home_path)
-    assert os.path.exists('%s/symtopo_output'%wave_path), ('Please save the output of symtopo to a file named symtopo_output.')
-    symtopo_data = read_symtopo_output(wave_path)
-    data['topo_class'], data['ind_group'], data['sym_ind'] = symtopo_data['topo_class'], symtopo_data['ind_group'], symtopo_data['sym_ind']
-    data['dgn_IR'], data['dgn_dim'], data['dgn_irrep'] = symtopo_data['dgn_IR'], symtopo_data['dgn_dim'], symtopo_data['dgn_irrep']
-    data['dgn_hsp'], data['dgn_hsl'] = symtopo_data['dgn_hsp'], symtopo_data['dgn_hsl']
-    # FIXME: not sure what is 'dng_IR' and 'dgn_irrep', check database
+    if os.path.exists(scf_nsoc_path):
+        outcar_data = read_OUTCAR(scf_nsoc_path)
+        Ef_scf_nsoc = outcar_data['Ef']
+        data['nelec'] = outcar_data['NELECT']
+        data['nsoc_efermi'] = Ef_scf_nsoc
+        data['nsoc_indirect_gap'] = outcar_data['indirect_gap']
 
-    # read info from DOSCAR
+    # read info from wave_soc/symtopo_output, i.e., topological classification data
     os.chdir(home_path)
-    if os.path.exists('dos'):
-        dos_path = home_path + '/dos'
-        dos_energy, dos, totdos = read_DOSCAR(dos_path)
-        save_dos_data(dos_energy, dos, totdos, Ef_scf, data['spacegroup'], data['formula'], home_path)
+    if os.path.exists(wave_soc_path):
+        assert os.path.exists('%s/symtopo_output'%wave_soc_path), ('Please save the output of symtopo to a file named symtopo_output.')
+        symtopo_data = read_symtopo_output(wave_soc_path)
+        data['soc_topo_class'], data['soc_ind_group'], data['soc_sym_ind'] = symtopo_data['topo_class'], symtopo_data['ind_group'], symtopo_data['sym_ind']
+        data['soc_dgn_IR'], data['soc_dgn_dim'], data['soc_dgn_irrep'] = symtopo_data['dgn_IR'], symtopo_data['dgn_dim'], symtopo_data['dgn_IRdim']
+        data['soc_dgn_hsp'], data['soc_dgn_hsl'] = symtopo_data['dgn_hsp'], symtopo_data['dgn_hsl']
+
+    os.chdir(home_path)
+    if os.path.exists(wave_nsoc_path):
+        assert os.path.exists('%s/symtopo_output'%wave_nsoc_path), ('Please save the output of symtopo to a file named symtopo_output.')
+        symtopo_data = read_symtopo_output(wave_nsoc_path)
+        data['nsoc_topo_class'], data['nsoc_ind_group'], data['nsoc_sym_ind'] = symtopo_data['topo_class'], symtopo_data['ind_group'], symtopo_data['sym_ind']
+        data['nsoc_dgn_IR'], data['nsoc_dgn_dim'], data['nsoc_dgn_irrep'] = symtopo_data['dgn_IR'], symtopo_data['dgn_dim'], symtopo_data['dgn_IRdim']
+        data['nsoc_dgn_hsp'], data['nsoc_dgn_hsl'] = symtopo_data['dgn_hsp'], symtopo_data['dgn_hsl']
+
+    # read info from dos_soc/DOSCAR
+    os.chdir(home_path)
+    if os.path.exists(dos_soc_path):
+        dos_energy, dos, totdos = read_DOSCAR(dos_soc_path)
+        dos_data = save_dos_data(dos_energy, dos, totdos, Ef_scf_soc, data['spacegroup'], data['formula'], dos_soc_path)
         Ef_dos, fermi_dos, dos_gap = find_fermi_dos(dos_energy, dos, totdos, data['nelec'])
-        data['fermi_dos'] = fermi_dos
-        data['dos_gap'] = dos_gap
-        data['efermi'] = Ef_dos
-        assert abs(Ef_scf - Ef_dos) < 2, ('Large difference of Ef from scf and dos! Results may be wrong.', Ef_scf, Ef_dos)
-       #data['dos'] = dos  # FIXME: not sure what is data['dos'], check database
+        data['soc_fermi_dos'] = fermi_dos
+        data['soc_dos_gap'] = dos_gap
+        data['soc_efermi'] = Ef_dos
+        data['soc_dos'] = dos_data
+
+    os.chdir(home_path)
+    if os.path.exists(dos_nsoc_path):
+        dos_energy, dos, totdos = read_DOSCAR(dos_nsoc_path)
+        dos_data = save_dos_data(dos_energy, dos, totdos, Ef_scf_nsoc, data['spacegroup'], data['formula'], dos_nsoc_path)
+        Ef_dos, fermi_dos, dos_gap = find_fermi_dos(dos_energy, dos, totdos, data['nelec'])
+        data['nsoc_fermi_dos'] = fermi_dos
+        data['nsoc_dos_gap'] = dos_gap
+        data['nsoc_efermi'] = Ef_dos
+        data['nsoc_dos'] = dos_data
 
     # read info from band
     os.chdir(home_path)
-    if os.path.exists('band'):
-        band_path = home_path + '/band'
-        os.chdir(band_path)
+    if os.path.exists(band_soc_path):
+        os.chdir(band_soc_path)
         band_energy = read_EIGENVAL()
-        plot_band(band_path, data['efermi'], data['nelec'], soc)
+        plot_band(band_soc_path, data['soc_efermi'], data['nelec'], soc=True)
+        data['soc_band'] = True
 
     os.chdir(home_path)
-    print(data)
-    np.save('mat.npy', data)
+    if os.path.exists(band_nsoc_path):
+        os.chdir(band_nsoc_path)
+        band_energy = read_EIGENVAL()
+        plot_band(band_nsoc_path, data['nsoc_efermi'], data['nelec'], soc=False)
+        data['nsoc_band'] = True
+
+    os.chdir(home_path)
+    for key, value in data.items():
+        print(key, ':', value)
+    np.save('mat_data.npy', data)
     return data
 
 
+def load_data():
+    data = np.load('mat_data.npy', allow_pickle=True)
 
 if __name__ == '__main__':
-    path = os.getcwd() + '/example/SnTe'
+    path = os.getcwd() + '/example/test'
     collect_data(path)
 
 

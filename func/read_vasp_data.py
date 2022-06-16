@@ -23,7 +23,7 @@ def read_structure(path):
         atom_position = np.zeros((tot_atom_num, 3))
         for irow in range(tot_atom_num):
             atom_position[irow] = [float(num) for num in f[8 + irow].split()]
-        # FIXME: what is the format of prim_cif_str and conv_cif_str?
+        data['poscar_str'] = f
         
     with open('phonopy_output', 'r') as f:
         f = f.readlines()
@@ -115,7 +115,7 @@ def read_OUTCAR(path, tol_fermi=1e-6):
 def read_symtopo_output(path):
     os.chdir(path)
     data = {'topo_class': None, 'ind_group': None, 'sym_ind': None, 
-            'dgn_IR': None, 'dgn_dim': None, 'dgn_irrep': None, 'dgn_hsp': None,
+            'dgn_IR': None, 'dgn_dim': None, 'dgn_IRdim': None, 'dgn_hsp': None,
             'dgn_hsl': None} 
 
     with open('symtopo_output', 'r') as f:
@@ -129,20 +129,28 @@ def read_symtopo_output(path):
                     data['sym_ind'] = [int(n) for n in f[iline + 1].split(':')[1].strip().split(',')]
 
                 if data['topo_class'] == 'insulator':
-                    data['topo_class'] = 'trivial'
+                    data['topo_class'] = 'Triv_Ins'
 
                 elif data['topo_class'] == 'HSLSM':
-                    data['dng_hsl'] = [s.strip().strip('\'') for s in f[iline + 1].split(':')[1].strip().split(',')]
+                    data['dgn_hsl'] = [s.strip().strip('\'') for s in f[iline + 1].split(':')[1].strip().split(',')]
 
                 elif data['topo_class'] == 'HSPSM':
                     n_dgn_kpts = int(f[iline + 2].split(':')[-1])
-                    dgn_hsp, dgn_IR, dgn_dim = [], [], []
+                    dgn_hsp, dgn_IR, dgn_dim, dgn_IRdim = [], [], [], []
                     for ik in range(n_dgn_kpts):
                         line = f[iline + 4 + ik].split()
                         dgn_hsp.append(line[0])
-                        dgn_IR.append(line[2])
-                        dgn_dim.append(int(line[3]))
-                    data['dng_hsp'], data['dng_IR'], data['dng_dim'] = dgn_hsp, dgn_IR, dgn_dim
+                        dgn_IR_tmp = line[2:-1]
+                        if len(dgn_IR_tmp) == 1:
+                            dgn_IR_str = dgn_IR_tmp[0]
+                        elif len(dgn_IR_tmp) == 3:
+                            dgn_IR_str = dgn_IR_tmp[0] + '_' + dgn_IR_tmp[-1]
+                        else:
+                            raise ValueError('Wrong format!', line)
+                        dgn_IR.append(dgn_IR_str)
+                        dgn_dim.append(int(line[-1]))
+                        dgn_IRdim.append('%s(%s)'%(dgn_IR_str, line[-1]))
+                    data['dgn_hsp'], data['dgn_IR'], data['dgn_dim'], data['dgn_IRdim'] = dgn_hsp, dgn_IR, dgn_dim, dgn_IRdim
     return data
 
 if __name__ == '__main__':

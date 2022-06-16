@@ -261,7 +261,7 @@ def plot_helper_settings(ylim, reciprocal_point_locations, reciprocal_point_labe
     plt.draw()
 
 
-def plot_band(band_path, E_fermi, nb, soc):
+def plot_band(band_path, E_fermi, nb, soc=True):
     os.chdir(band_path)
     kpoint_position, klabel_list, intersections = read_KPOINTS()
     num_kpoints = len(klabel_list)
@@ -271,8 +271,9 @@ def plot_band(band_path, E_fermi, nb, soc):
     band_info = read_EIGENVAL()
     
     # set plot window
-    upper_gap_energy = np.min(band_info[:,nb])
-    lower_gap_energy = np.max(band_info[:,nb-1])
+    band_num = nb if soc else nb // 2
+    upper_gap_energy = np.min(band_info[:, band_num])
+    lower_gap_energy = np.max(band_info[:, band_num - 1])
     plot_window = [-4, 4]
     if upper_gap_energy - E_fermi > 2:
         plot_window[1] += int(upper_gap_energy - E_fermi)
@@ -305,16 +306,10 @@ def plot_band(band_path, E_fermi, nb, soc):
     
     plt.figure()
     for iband in range(band_info.shape[0]):
-        if soc:
-            if iband < nb:
-                band_color = 'green'
-            else:
-                band_color = 'red'
+        if iband < band_num:
+            band_color = 'green'
         else:
-            if iband < nb/2:
-                band_color = 'green'
-            else:
-                band_color = 'red'
+            band_color = 'red'
 
         for i,ilist in enumerate(continue_list):
             plt.plot(xcoord[intersections*ilist[0]:intersections*ilist[-1]], band_info[iband, intersections*ilist[0]:intersections*ilist[-1]], \
