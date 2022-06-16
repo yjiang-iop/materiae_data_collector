@@ -5,11 +5,17 @@ from func.read_doscar import *
 from func.plot_band import plot_band, read_EIGENVAL
 
 '''
-1. Assume the material is computed using vasp, with folders scf/, wave/, band/, dos/.
-   In the wave/ folder, the wavefunction at high-symmetry points is computed, 
+1. Assume the material is computed using vasp, with results in folders scf_(n)soc/, wave_(n)soc/, band_(n)soc/, dos_(n)soc/.
+   If only part of the computation is done, eg, only soc data, this script will collect data from existing folder.
+
+2. In the wave_(n)soc/ folder, the wavefunction at high-symmetry points is computed, 
    and the output of symtopo is saved in a file named symtopo_output.
-2. This script is used to collect basic info of the material, generating output files mat.npy, bandplot.svg, dos.dat
+
+3. This script is used to collect basic info of the material, generating output files mat_data.npy and bandplot.svg.
    Info that needs to be input manually: mp_id, icsd_ids.
+
+4. Files that used: scf_(n)soc/OUTCAR, wave_(n)soc/POSCAR, symtopo_output, 
+   band_(n)soc/EIGENVAL, POSCAR, KPOINTS, dos_(n)soc/DOSCAR
 
 '''
 
@@ -67,7 +73,7 @@ def collect_data(home_path):
         data['nsoc_efermi'] = Ef_scf_nsoc
         data['nsoc_indirect_gap'] = outcar_data['indirect_gap']
 
-    # read info from wave_soc/symtopo_output, i.e., topological classification data
+    # read info from wave_(n)soc/symtopo_output, i.e., topological classification data
     os.chdir(home_path)
     if os.path.exists(wave_soc_path):
         assert os.path.exists('%s/symtopo_output'%wave_soc_path), ('Please save the output of symtopo to a file named symtopo_output.')
@@ -84,7 +90,7 @@ def collect_data(home_path):
         data['nsoc_dgn_IR'], data['nsoc_dgn_dim'], data['nsoc_dgn_irrep'] = symtopo_data['dgn_IR'], symtopo_data['dgn_dim'], symtopo_data['dgn_IRdim']
         data['nsoc_dgn_hsp'], data['nsoc_dgn_hsl'] = symtopo_data['dgn_hsp'], symtopo_data['dgn_hsl']
 
-    # read info from dos_soc/DOSCAR
+    # read info from dos_(n)soc/DOSCAR
     os.chdir(home_path)
     if os.path.exists(dos_soc_path):
         dos_energy, dos, totdos = read_DOSCAR(dos_soc_path)
@@ -105,7 +111,7 @@ def collect_data(home_path):
         data['nsoc_efermi'] = Ef_dos
         data['nsoc_dos'] = dos_data
 
-    # read info from band
+    # read info from band_(n)soc/EIGENVAL, POSCAR, KPOINTS
     os.chdir(home_path)
     if os.path.exists(band_soc_path):
         os.chdir(band_soc_path)
@@ -129,6 +135,7 @@ def collect_data(home_path):
 
 def load_data():
     data = np.load('mat_data.npy', allow_pickle=True)
+
 
 if __name__ == '__main__':
     path = os.getcwd() + '/example/SnTe'
