@@ -133,13 +133,15 @@ def collect_data(home_path):
     return data
 
 
-def load_data():
-    data = np.load('mat_data.npy', allow_pickle=True)
+def load_data(path):
+    data = np.load('%s/mat_data.npy'%path, allow_pickle=True)
 
 
 if __name__ == '__main__':
     path = os.getcwd() + '/example/SnTe'
     collect_data(path)
+
+   #data = load_data(path)
 
 
 

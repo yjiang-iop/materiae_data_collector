@@ -75,7 +75,7 @@ def read_KPOINTS():
 def read_EIGENVAL():
     with open('EIGENVAL','r') as file:
         lines=file.readlines()
-        total_line=len(lines) # total number of lines in OUTCAR
+        total_line=len(lines)
 
         for cnt,line in enumerate(lines):
             if cnt < 5:
