@@ -15,7 +15,7 @@ from func.bz import get_BZ
 3. This script is used to collect basic info of the material, generating output files mat_data.npy and bandplot.svg.
    Info that needs to be input manually: mp_id, icsd_ids.
 
-4. Files that used: scf_(n)soc/OUTCAR, wave_(n)soc/POSCAR, symtopo_output, 
+4. Files that used: scf_(n)soc/OUTCAR, POSCAR, wave_(n)soc/symtopo_output, 
    band_(n)soc/EIGENVAL, POSCAR, KPOINTS, dos_(n)soc/DOSCAR
 
 '''
