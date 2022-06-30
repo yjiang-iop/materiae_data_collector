@@ -3,6 +3,7 @@ import numpy as np
 from func.read_vasp_data import *
 from func.read_doscar import *
 from func.plot_band import plot_band, read_EIGENVAL
+from func.bz import get_BZ
 
 '''
 1. Assume the material is computed using vasp, with results in folders scf_(n)soc/, wave_(n)soc/, band_(n)soc/, dos_(n)soc/.
@@ -36,7 +37,7 @@ def collect_data(home_path):
 
     data = {'formula': None, 'elements_num': None, 'nelem': None, 'mp_id': None, 'icsd_ids': None,
             'nelec': None, 'nsite': None, 'spacegroup': None,  
-            'poscar_str': None, 'prim_cif_str': None, 'conv_cif_str': None, 'BZ': None, 
+            'prim_cif_str': None, 'conv_cif_str': None, 'BZ': None, 
             'soc_efermi': None, 'soc_dos': None, 'soc_fermi_dos': None, 'soc_dos_gap': None, 
             'soc_indirect_gap': None, 'soc_band': None, 
             'soc_topo_class': None, 'soc_ind_group': None, 'soc_sym_ind': None, 
@@ -53,8 +54,10 @@ def collect_data(home_path):
     data['elements_num'] = poscar_data['elements_num']
     data['nsite'] = poscar_data['nsite']
     data['spacegroup'] = poscar_data['spacegroup']
-    data['poscar_str'] = poscar_data['poscar_str'] # FIXME: str of POSCAR, can be used to generate 'prim_cif_str', 'conv_cif_str'.
-    # FIXME: 'BZ' seems to be generated using other scripts.
+   #data['poscar_str'] = poscar_data['poscar_str'] 
+    data['prim_cif_str'] = poscar_data['prim_cif_str']
+    data['conv_cif_str'] = poscar_data['conv_cif_str']
+    data['BZ'] = get_BZ(poscar_data['latt_vec'], poscar_data['spacegroup'])
 
     # read info from scf_soc/OUTCAR
     os.chdir(home_path)

@@ -1,29 +1,23 @@
 import os
 import numpy as np
+from numpy.linalg import norm
+from math import acos, pi
 from functools import reduce
 
 def read_structure(path):
     os.chdir(path)
-    os.system('phonopy --symmetry > phonopy_output')
-    data = {}
-    with open('PPOSCAR', 'r') as f:
-        f = f.readlines()
-        prim_vec = np.zeros((3,3))
-        lines = f[2:5]
-        for irow, line in enumerate(f[2:5]):
-            prim_vec[irow] = np.array([float(num) for num in line.split()])
-        elem = f[5].split()
-        data['nelem'] = len(elem)
-        elem_num = [int(n) for n in f[6].split()]
-        assert len(elem) == len(elem_num)
-        data['formula'] = reduce(lambda a, b: a+b, [e + str(n) if n > 1 else e for e, n in zip(elem, elem_num)])
-        data['elements_num'] = elem_num
-        tot_atom_num = sum(elem_num)
+    try:
+        os.system('phonopy --symmetry > phonopy_output')
+    except:
+        raise Exception('Fail to read POSCAR! Please install phonopy using \'pip install phonopy\'')
 
-        atom_position = np.zeros((tot_atom_num, 3))
-        for irow in range(tot_atom_num):
-            atom_position[irow] = [float(num) for num in f[8 + irow].split()]
-        data['poscar_str'] = f
+    data = read_POSCAR(path + '/PPOSCAR')
+    data_conv = read_POSCAR(path + '/BPOSCAR')
+
+    prim_cif_str = convert_poscar2cif(data['latt_vec'], data['atom_position'], data['elem'], data['elements_num'])
+    conv_cif_str = convert_poscar2cif(data_conv['latt_vec'], data_conv['atom_position'], data_conv['elem'], data_conv['elements_num'])
+    data['prim_cif_str'] = prim_cif_str
+    data['conv_cif_str'] = conv_cif_str
         
     with open('phonopy_output', 'r') as f:
         f = f.readlines()
@@ -31,8 +25,69 @@ def read_structure(path):
         assert 'space_group_number' in f[2]
         data['spacegroup'] =  int(f[2].strip().split()[-1])
 
-    os.system('rm PPOSCAR BPOSCAR phonopy_output')
+   #os.system('rm PPOSCAR BPOSCAR phonopy_output')
     return data
+
+def read_POSCAR(file_name):
+    data = {}
+    with open(file_name, 'r') as f:
+        f = f.readlines()
+        prim_vec = np.zeros((3,3))
+        lines = f[2:5]
+        for irow, line in enumerate(f[2:5]):
+            prim_vec[irow] = np.array([float(num) for num in line.split()])
+        data['latt_vec'] = prim_vec
+        data['elem'] = f[5].split()
+        data['nelem'] = len(data['elem'])
+        data['elements_num'] = [int(n) for n in f[6].split()]
+        assert len(data['elem']) == len(data['elements_num'])
+        data['formula'] = reduce(lambda a, b: a+b, [e + str(n) if n > 1 else e for e, n in zip(data['elem'], data['elements_num'])])
+        tot_atom_num = sum(data['elements_num'])
+
+        atom_position = np.zeros((tot_atom_num, 3))
+        for irow in range(tot_atom_num):
+            atom_position[irow] = [float(num) for num in f[8 + irow].split()]
+        data['atom_position'] = atom_position
+        data['poscar_str'] = f
+    return data
+
+def convert_poscar2cif(latt_vec, atom_position, elem, elem_num):
+    cell_length = [norm(v) for v in latt_vec]
+    cell_angle = np.zeros(3)
+    a, b, c = latt_vec 
+    cell_angle[0] = acos((b[0] * c[0] + b[1] * c[1] + b[2] * c[2]) / (cell_length[1] * cell_length[2])) * 180 / pi
+    cell_angle[1] = acos((a[0] * c[0] + a[1] * c[1] + a[2] * c[2]) / (cell_length[0] * cell_length[2])) * 180 / pi
+    cell_angle[2] = acos((b[0] * a[0] + b[1] * a[1] + b[2] * a[2]) / (cell_length[0] * cell_length[1])) * 180 / pi
+
+    cif_str = 'data\n'
+    cif_str += '_cell_length_a  %.10f\n'%(cell_length[0])
+    cif_str += '_cell_length_a  %.10f\n'%(cell_length[1])
+    cif_str += '_cell_length_a  %.10f\n'%(cell_length[2])
+    cif_str += '_cell_angle_alpha  %.5f\n'%(cell_angle[0])
+    cif_str += '_cell_angle_beta   %.5f\n'%(cell_angle[1])
+    cif_str += '_cell_angle_gamma  %.5f\n\n'%(cell_angle[2])
+    cif_str += '_symmetry_space_group_name_H-M    \'P 1\'\n'
+    cif_str += 'loop_\n'
+    cif_str += '_atom_site_label\n'
+    cif_str += '_atom_site_type_symbol\n'
+    cif_str += '_atom_site_fract_x\n'
+    cif_str += '_atom_site_fract_y\n'
+    cif_str += '_atom_site_fract_z\n'
+    cif_str += '_atom_site_occupancy\n'
+    
+    cnt = 1
+    elem_list = []
+    for ele, ne in zip(elem, elem_num):
+        elem_list.extend([ele] * ne)
+    assert len(elem_list) == len(atom_position)
+    name_list = [ele + str(i+1) for i, ele in enumerate(elem_list)]
+
+    for name, ele, pos in zip(name_list, elem_list, atom_position):
+        cif_str += '%s  %s  %2.15f  %2.15f %2.15f  1.0\n'%(name, ele, pos[0], pos[1], pos[2])
+
+   #print(cif_str)
+    return cif_str
+
 
 def read_OUTCAR(path, tol_fermi=1e-6):
 
