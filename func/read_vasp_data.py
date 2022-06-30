@@ -16,6 +16,7 @@ def read_structure(path):
 
     prim_cif_str = convert_poscar2cif(data['latt_vec'], data['atom_position'], data['elem'], data['elements_num'])
     conv_cif_str = convert_poscar2cif(data_conv['latt_vec'], data_conv['atom_position'], data_conv['elem'], data_conv['elements_num'])
+    data['latt_vec_conv'] = data_conv['latt_vec']
     data['prim_cif_str'] = prim_cif_str
     data['conv_cif_str'] = conv_cif_str
         

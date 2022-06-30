@@ -58,6 +58,7 @@ def collect_data(home_path):
     data['prim_cif_str'] = poscar_data['prim_cif_str']
     data['conv_cif_str'] = poscar_data['conv_cif_str']
     data['BZ'] = get_BZ(poscar_data['latt_vec'], poscar_data['spacegroup'])
+   #data['BZ'] = get_BZ(poscar_data['latt_vec_conv'], poscar_data['spacegroup'])
 
     # read info from scf_soc/OUTCAR
     os.chdir(home_path)
