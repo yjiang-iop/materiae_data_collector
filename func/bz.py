@@ -17,7 +17,7 @@ def get_BZ(prim_lattice, spg_num):
     # Calculate reciprocal lattice from primitive lattice
     rec_lattice = numpy.array(get_reciprocal_cell_rows(prim_lattice))
     b1, b2, b3 = rec_lattice
-    a1, a2, a3 = prim_lattice
+    a1, a2, a3 = prim_lattice.tolist()
     # Calculate BZ faces from reciprocal lattice
     faces_data = brillouinzone.get_BZ(b1=b1, b2=b2, b3=b3)
     # Get high symmetry points and lines from database

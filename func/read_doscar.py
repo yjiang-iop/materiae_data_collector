@@ -49,7 +49,7 @@ def save_dos_data(energy, dos, totdos, Ef_scf, sg, mat_formula, save_path):
             doscar.write('%15.7f     %15.7f    %15.7f     \n'%(energy[ii], dos[ii], totdos[ii]))
     
     dos_data = np.array([[e, d] for e, d in zip(energy, dos)])
-    return dos_data
+    return dos_data.tolist()
 
 def find_fermi_dos(energy, dos, totdos, NELECT, delta=1e-4, error=1e-3):
     # find the dos value at fermi level, as well as the more accuracy fermi energy from doscar
