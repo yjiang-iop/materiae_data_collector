@@ -209,6 +209,19 @@ def read_symtopo_output(path):
                     data['dgn_hsp'], data['dgn_IR'], data['dgn_dim'], data['dgn_IRdim'] = dgn_hsp, dgn_IR, dgn_dim, dgn_IRdim
     return data
 
+def read_mp_icsd_id(home_path):
+    os.chdir(home_path)
+    if os.path.exists('mp_icsd_id'):
+        with open('mp_icsd_id', 'r') as f:
+            f = f.readlines()
+            assert 'mp_id:' in f[0] and 'icsd_id' in f[1], 'The two ids should be written as: mp_id: XXX'
+            mp_id = f[0].strip().split(':')[1].strip()
+            icsd_id = f[1].strip().split(':')[1].strip(' []').split(',')
+            return mp_id, icsd_id
+    else:
+        return None, None
+
+
 if __name__ == '__main__':
     read_symtopo_output('./test')
 

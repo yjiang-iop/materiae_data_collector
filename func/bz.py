@@ -1,10 +1,12 @@
 import numpy
+import os
 from func import brillouinzone
 from pprint import pprint
 
 all_kpoints = {}
+dir = os.path.split(os.path.realpath(__file__))[0] 
 for i in range(1, 231):
-    path = './func/kpoints/%d' % i
+    path = dir + '/kpoints/%d' % i
     with open(path) as file:
         all_kpoints[i] = {}
         for line in file.readlines()[3:]:

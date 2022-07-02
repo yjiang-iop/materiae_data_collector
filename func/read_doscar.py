@@ -39,7 +39,8 @@ def read_DOSCAR(path):
 
 def save_dos_data(energy, dos, totdos, Ef_scf, sg, mat_formula, save_path):
     assert energy[0] < Ef_scf and energy[-1]> Ef_scf, (energy, Ef_scf) 
-    energy = np.array(energy) - Ef_scf
+   #energy = np.array(energy) - Ef_scf
+    energy = np.array(energy)
     
     num_dos_points = len(energy)
     with open(save_path + '/dos.dat', 'w') as doscar:
