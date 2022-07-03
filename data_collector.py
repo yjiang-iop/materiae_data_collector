@@ -14,7 +14,8 @@ from func.read_tabind import read_indicator_table
    In the wave_(n)soc/ folder, the wavefunction at high-symmetry points is computed, 
    and the output of symtopo should be saved in a file named symtopo_output.
 
-2. This script is used to collect basic info of the material, generating output files mat_data.npy and bandplot.svg.
+2. This script is used to collect basic info of the material, generating output files mat_data.npy and bandplot.svg,
+   stored in folder 'materiae_data'.
 
    Files that used: scf_(n)soc/OUTCAR, POSCAR, wave_(n)soc/symtopo_output, 
    band_(n)soc/EIGENVAL, POSCAR, KPOINTS, dos_(n)soc/DOSCAR
@@ -33,6 +34,7 @@ def collect_data(home_path):
                 'scf_nsoc': 'scf_nsoc', 'wave_nsoc': 'wave_nsoc', 'band_nsoc': 'band_nsoc', 'dos_nsoc': 'dos_nsoc'}
 
     os.chdir(home_path)
+    os.mkdir('materiae_data')
     assert dir_name['scf_soc'] in os.listdir() and dir_name['wave_soc'] in os.listdir(), (
         'Please exculated this script in the folder that contains the following folders: scf/, wave/, band/, and dos/')
     scf_soc_path, wave_soc_path  = home_path +'/'+ dir_name['scf_soc'], home_path +'/'+ dir_name['wave_soc']
@@ -131,6 +133,7 @@ def collect_data(home_path):
         band_energy = read_EIGENVAL()
         plot_band(band_soc_path, data['soc_efermi'], data['nelec'], soc=True)
         data['soc_band'] = True
+        os.system('cp bandplot.svg %s/materiae_data/bandplot_soc.svg'%home_path)
 
     os.chdir(home_path)
     if os.path.exists(band_nsoc_path):
@@ -138,11 +141,12 @@ def collect_data(home_path):
         band_energy = read_EIGENVAL()
         plot_band(band_nsoc_path, data['nsoc_efermi'], data['nelec'], soc=False)
         data['nsoc_band'] = True
+        os.system('cp bandplot.svg %s/materiae_data/bandplot_nsoc.svg'%home_path)
 
     os.chdir(home_path)
     for key, value in data.items():
         print(key, ':', value)
-    np.save('mat_data.npy', data)
+    np.save('./materiae_data/mat_data.npy', data)
     return data
 
 
