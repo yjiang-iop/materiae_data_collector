@@ -34,7 +34,8 @@ def collect_data(home_path):
                 'scf_nsoc': 'scf_nsoc', 'wave_nsoc': 'wave_nsoc', 'band_nsoc': 'band_nsoc', 'dos_nsoc': 'dos_nsoc'}
 
     os.chdir(home_path)
-    os.mkdir('materiae_data')
+    if not os.path.exists('materiae_data'):
+        os.mkdir('materiae_data')
     assert dir_name['scf_soc'] in os.listdir() and dir_name['wave_soc'] in os.listdir(), (
         'Please exculated this script in the folder that contains the following folders: scf/, wave/, band/, and dos/')
     scf_soc_path, wave_soc_path  = home_path +'/'+ dir_name['scf_soc'], home_path +'/'+ dir_name['wave_soc']
@@ -145,7 +146,10 @@ def collect_data(home_path):
 
     os.chdir(home_path)
     for key, value in data.items():
-        print(key, ':', value)
+        if key in ['soc_dos', 'nsoc_dos', 'BZ']:
+            print(key, ': see mat_data.npy for details.')
+        else:
+            print(key, ':', value)
     np.save('./materiae_data/mat_data.npy', data)
     return data
 
